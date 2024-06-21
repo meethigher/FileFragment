@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -55,7 +57,7 @@ public class FileFragment {
                             int len = (int) Math.min((chunkSize - totalBytesRead), bufferSize);
                             //表示对整个大文件读取完成
                             if ((bytesRead = fis.read(buffer, 0, len)) == -1) {
-                                log.info("{} is created", chunkFile);
+                                log.info("{} is created. the original file has been read to the end", chunkFile);
                                 totalBytesRead = 0;
                                 hasNext = false;
                                 break;
@@ -71,8 +73,6 @@ public class FileFragment {
                         }
                     }
                 }
-
-
                 log.info("file split success, the total number of part files is {}", chunkNumber);
             } catch (Exception e) {
                 log.error("split file error, " + e.toString());
@@ -119,8 +119,9 @@ public class FileFragment {
             String tempName = files[0].getName();
             mergeFileName = tempName.substring(tempName.indexOf(delimiter) + 1, tempName.lastIndexOf(delimiter));
         }
-        // TODO: 2024/6/20 按顺序合并
-        //保存到原目录下
+        // 按顺序进行文件合并。故需要对文件数组先进行排序
+        Arrays.sort(files, Comparator.comparing(File::getName));
+        // 保存到原目录下
         try (FileOutputStream fos = new FileOutputStream(mergePath(directoryPath, mergeFileName))) {
             for (File file : files) {
                 try (FileInputStream fis = new FileInputStream(file)) {
