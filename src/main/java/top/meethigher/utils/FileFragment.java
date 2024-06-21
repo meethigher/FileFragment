@@ -102,7 +102,6 @@ public class FileFragment {
      * @return 文件名称
      */
     public String mergeFiles(String directoryPath, String fileName) {
-        // TODO: 2024/6/20 使用缓冲区进行合并，否则容易把内存干崩
         File dir = new File(directoryPath);
         String mergeFileName = fileName;
         if (!(dir.exists() && dir.isDirectory())) {
@@ -125,10 +124,13 @@ public class FileFragment {
         try (FileOutputStream fos = new FileOutputStream(mergePath(directoryPath, mergeFileName))) {
             for (File file : files) {
                 try (FileInputStream fis = new FileInputStream(file)) {
-                    byte[] buffer = new byte[(int) file.length()];
-                    fis.read(buffer);
-                    fos.write(buffer);
+                    byte[] buffer = new byte[bufferSize];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer, 0, bufferSize)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
                     fos.flush();
+                    log.info("{} is merged", file.getName());
                 }
             }
         } catch (Exception e) {
