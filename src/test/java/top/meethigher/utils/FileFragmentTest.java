@@ -8,8 +8,8 @@ public class FileFragmentTest {
 
     @Test
     public void split() {
-        fileFragment.splitFile("E:/testFileFragment/20231014_210729.zip", 2048 * 1024 * 1024);
-//        fileFragment.splitFile("E:/testFileFragment/CFW-0.20.30-X64.zip", 2 * 1024 * 1024);
+        fileFragment.splitFile("E:/testFileFragment/20231014_210729.zip", 2048 * 1024 * 1024L);
+//        fileFragment.splitFile("E:/testFileFragment/CFW-0.20.30-X64.zip", 20 * 1024 * 1024);
     }
 
 

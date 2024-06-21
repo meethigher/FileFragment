@@ -21,7 +21,7 @@ public class FileFragment {
 
     private final String delimiter = "."; // 分割符
 
-    private final int DEFAULT_CHUNK_SIZE = 1024 * 1024; // 默认分片大小为1MB
+    private final long DEFAULT_CHUNK_SIZE = 1024 * 1024L; // 默认分片大小为1MB
 
     private final String EXTENSION = delimiter + "part";// 文件扩展名
 
@@ -34,29 +34,45 @@ public class FileFragment {
      * @param chunkSize 小文件的大小
      * @return 小文件的名称
      */
-    public List<String> splitFile(String filePath, int chunkSize) {
-        // TODO: 2024/6/20 使用缓冲区进行分片
+    public List<String> splitFile(String filePath, long chunkSize) {
         // TODO: 2024/6/20 使用多线程进行分片
         List<String> list = new ArrayList<>();
         File file = new File(filePath);
         if (file.exists() && file.isFile()) {
             try (FileInputStream fis = new FileInputStream(file)) {
-                byte[] buffer = new byte[chunkSize];
-                int bytesRead;
-                int chunkNumber = 0;
-                while ((bytesRead = fis.read(buffer)) > 0) {
+                byte[] buffer = new byte[bufferSize];
+                long totalBytesRead = 0;
+                int bytesRead, chunkNumber = 0;
+                boolean hasNext = true;
+                while (hasNext) {
                     //分片的文件名
                     String chunkFile = SPLIT_FILENAME_TEMPLATE.replace("{originFileName}", file.getName())
                             .replace("{order}", String.format("%03d", ++chunkNumber))
                             .replace("{extension}", EXTENSION);
-                    String targetChunkFilePath = file.getAbsolutePath().replace(file.getName(), chunkFile);
-                    try (FileOutputStream fos = new FileOutputStream(targetChunkFilePath)) {
-                        fos.write(buffer, 0, bytesRead);
-                        fos.flush();
+                    String targetChunkFile = file.getAbsolutePath().replace(file.getName(), chunkFile);
+                    try (FileOutputStream fos = new FileOutputStream(targetChunkFile)) {
+                        while (true) {
+                            int len = (int) Math.min((chunkSize - totalBytesRead), bufferSize);
+                            //表示对整个大文件读取完成
+                            if ((bytesRead = fis.read(buffer, 0, len)) == -1) {
+                                log.info("{} is created", chunkFile);
+                                totalBytesRead = 0;
+                                hasNext = false;
+                                break;
+                            }
+                            totalBytesRead += bytesRead;
+                            fos.write(buffer, 0, bytesRead);
+                            if (totalBytesRead == chunkSize) {
+                                fos.flush();
+                                log.info("{} is created", chunkFile);
+                                totalBytesRead = 0;
+                                break;
+                            }
+                        }
                     }
-                    log.info("{} is created", chunkFile);
-                    list.add(chunkFile);
                 }
+
+
                 log.info("file split success, the total number of part files is {}", chunkNumber);
             } catch (Exception e) {
                 log.error("split file error, " + e.toString());
@@ -115,7 +131,7 @@ public class FileFragment {
                 }
             }
         } catch (Exception e) {
-            log.error("failed to merge files, " +e.toString());
+            log.error("failed to merge files, " + e.toString());
             return null;
         }
         log.info("merge files success");
