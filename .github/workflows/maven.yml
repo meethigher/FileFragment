@@ -11,8 +11,8 @@ name: Build, Package, and Release Java Project
 on:
   push:
     tags:
-      - 'v*.*.*'  # 当推送带有版本标签（例如 v1.0.1）的代码时触发
-      - 'v*.*' # 当推送带有版本标签（例如 v1.0）的代码时触发
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
 # 在push或者pull_request时触发
 # on:
 #   push:
@@ -22,7 +22,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -62,6 +61,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./staging/
-          asset_name: FileFragment-1.0.jar
-          asset_content_type: application/java-archive
+          asset_path: Package.zip
+          asset_name: Package.zip
+          asset_content_type: application/zip
