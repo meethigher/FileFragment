@@ -6,13 +6,19 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Build, Package, and Release Java Project
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:
+      - 'v*.*.*'  # 当推送带有版本标签（例如 v1.0.1）的代码时触发
+      - 'v*.*' # 当推送带有版本标签（例如 v1.0）的代码时触发
+# 在push或者pull_request时触发
+# on:
+#   push:
+#     branches: [ "master" ]
+#   pull_request:
+#     branches: [ "master" ]
 
 jobs:
   build:
@@ -20,18 +26,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 8
-      uses: actions/setup-java@v3
-      with:
-        java-version: '8'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn package -DskipTests
-    - name: Upload JAR artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: FileFragment
-        path: target/*.jar
-        retention-days: 1  # 将保留 artifact 30 天
+      - uses: actions/checkout@v4
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      # 构建jar包
+      - name: Build with Maven
+        run: mvn package -DskipTests
+      # 上传打包后内容到artifact
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: FileFragment
+          path: target/*.jar
+          retention-days: 1  # 设置保留 artifact 天数
+      # 创建release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      # 发布release
+      - name: Upload JAR to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/*.jar
+          # asset_name: FileFragment.jar
+          asset_content_type: application/java-archive
