@@ -40,7 +40,7 @@ jobs:
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Package
+          name: Package-${{ github.ref }}
           path: staging
           retention-days: 1  # 设置保留 artifact 天数
       # 创建release
@@ -55,7 +55,7 @@ jobs:
           draft: false
           prerelease: false
       # 发布release
-      - run: zip Release-${{ github.ref }}.zip ./staging/*
+      - run: zip Release-${{ github.ref }}.zip staging
       - name: Upload JAR to Release
         uses: actions/upload-release-asset@v1
         env:
