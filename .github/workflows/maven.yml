@@ -55,7 +55,7 @@ jobs:
           draft: false
           prerelease: false
       # 发布release
-      - run: zip  ${{ github.ref_name }} staging
+      - run: zip  ${{ github.ref_name }}.zip staging/*
       - name: Upload JAR to Release
         uses: actions/upload-release-asset@v1
         env:
