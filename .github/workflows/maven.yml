@@ -40,7 +40,7 @@ jobs:
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Package-${{ github.ref }}
+          name: ${{ github.repository }}-${{ github.ref_name }}
           path: staging
           retention-days: 1  # 设置保留 artifact 天数
       # 创建release
@@ -55,13 +55,13 @@ jobs:
           draft: false
           prerelease: false
       # 发布release
-      - run: zip Release-${{ github.ref }}.zip staging
+      - run: zip  ${{ github.repository }}-${{ github.ref_name }} staging
       - name: Upload JAR to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Release-${{ github.ref }}.zip
-          asset_name: Release-${{ github.ref }}.zip
+          asset_path:  ${{ github.repository }}-${{ github.ref_name }}.zip
+          asset_name:  ${{ github.repository }}-${{ github.ref_name }}.zip
           asset_content_type: application/zip
