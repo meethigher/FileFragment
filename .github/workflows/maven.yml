@@ -34,3 +34,4 @@ jobs:
       with:
         name: FileFragment
         path: target/*.jar
+        retention-days: 1  # 将保留 artifact 30 天
