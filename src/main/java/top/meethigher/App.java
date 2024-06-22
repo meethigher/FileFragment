@@ -49,7 +49,7 @@ public class App {
                     String filePath = scanner.next();
                     System.out.print("Enter the size of the part file (MB): ");
                     int partSize = scanner.nextInt();
-                    fileFragment.splitFile(filePath, partSize * 1024 * 1024);
+                    fileFragment.splitFile(filePath, partSize * 1024 * 1024L);
                     break;
                 case "m":
                     System.out.print("Enter directory path: ");
