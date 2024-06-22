@@ -29,3 +29,8 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn package -DskipTests
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: FileFragment
+        path: target/*.jar
