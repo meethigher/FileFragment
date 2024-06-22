@@ -54,8 +54,9 @@ jobs:
           release_name: Release-${{ github.ref }}
           draft: false
           prerelease: false
-      # 发布release
+      # 将软件包打成zip压缩包
       - run: zip  ${{ github.ref_name }}.zip staging/*
+      # 将zip压缩包上传至release
       - name: Upload JAR to Release
         uses: actions/upload-release-asset@v1
         env:
