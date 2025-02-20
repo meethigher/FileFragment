@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -119,7 +118,11 @@ public class FileFragment {
             mergeFileName = tempName.substring(tempName.indexOf(delimiter) + 1, tempName.lastIndexOf(delimiter));
         }
         // 按顺序进行文件合并。故需要对文件数组先进行排序
-        Arrays.sort(files, Comparator.comparing(File::getName));
+        Arrays.sort(files, (o1, o2) -> {
+            String o1Order = o1.getName().substring(0, o1.getName().indexOf(delimiter));
+            String o2Order = o2.getName().substring(0, o2.getName().indexOf(delimiter));
+            return Integer.parseInt(o1Order) - Integer.parseInt(o2Order);
+        });
         // 保存到原目录下
         try (FileOutputStream fos = new FileOutputStream(mergePath(directoryPath, mergeFileName))) {
             for (File file : files) {
